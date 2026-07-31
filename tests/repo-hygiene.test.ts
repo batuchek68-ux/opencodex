@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
+<<<<<<< HEAD
 import { existsSync } from "node:fs";
+=======
+>>>>>>> origin/preview
 import { fileURLToPath } from "node:url";
 
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
@@ -31,6 +34,7 @@ function trackedFiles(): string[] {
     .filter(Boolean);
 }
 
+<<<<<<< HEAD
 function trackedEntries(): { mode: string; path: string }[] {
   const result = Bun.spawnSync(["git", "ls-files", "-s"], { cwd: repoRoot });
   if (result.exitCode !== 0) {
@@ -47,6 +51,8 @@ function trackedEntries(): { mode: string; path: string }[] {
     });
 }
 
+=======
+>>>>>>> origin/preview
 describe("repository hygiene", () => {
   test("no local agent or session state is tracked", () => {
     const offenders = trackedFiles().filter((path) =>
@@ -72,6 +78,7 @@ describe("repository hygiene", () => {
     }
   });
 });
+<<<<<<< HEAD
 
 /**
  * `devlog/` notes are tracked in this repository, and no submodule remains.
@@ -199,3 +206,5 @@ describe("devlog is tracked, with no submodule left behind", () => {
     expect(offenders).toEqual([]);
   });
 });
+=======
+>>>>>>> origin/preview
