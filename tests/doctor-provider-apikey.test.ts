@@ -33,4 +33,19 @@ describe("doctor provider apiKey env diagnostics (#762)", () => {
     }, {});
     expect(rows).toEqual([]);
   });
+
+  test("treats omitted authMode as key auth (init default)", () => {
+    const rows = collectProviderApiKeyDiagnostics({
+      openrouter: { apiKey: "${OPENROUTER_API_KEY}" },
+    }, {});
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.envName).toBe("OPENROUTER_API_KEY");
+  });
+
+  test("skips disabled providers", () => {
+    const rows = collectProviderApiKeyDiagnostics({
+      openrouter: { authMode: "key", apiKey: "${OPENROUTER_API_KEY}", disabled: true },
+    }, {});
+    expect(rows).toEqual([]);
+  });
 });

@@ -426,6 +426,8 @@ ocx codex-shim uninstall
 기반 재설치 절차를 안내합니다. 새 진단의 경로에서는 OS 사용자 이름을 가립니다. 복구 안내는 출력하지만
 직접 적용하지 않습니다.
 
+**Provider API keys** 섹션은 키 인증 프로바이더(`authMode` 생략 시 기본값 key) 중 `apiKey`가 환경 변수 참조(`${VAR}` 또는 `$VAR`)인 항목을 검사합니다. **이 doctor 프로세스**에서 설정되지 않았거나 비어 있는 참조를 표시하며 값은 출력하지 않습니다. OAuth, forward, local 및 비활성화된 프로바이더는 건너뜁니다. 설정을 읽을 수 없으면 `ok` 대신 `--`를 표시합니다. 프록시가 설치된 서비스로 실행 중이면 **Running proxy process proxy env**와 비교하세요. 실제 라우팅에는 서비스 프로세스의 변수만 적용됩니다.
+
 ### `ocx debug [provider|usage …]`
 
 실행 중인 프록시의 관리 API에서 런타임 디버그 override를 읽거나 바꿉니다.

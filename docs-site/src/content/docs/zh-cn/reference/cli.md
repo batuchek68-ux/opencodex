@@ -408,6 +408,8 @@ ocx codex-shim uninstall
 窄范围检测 Windows Orca runtime-home 不一致，并在需要时说明如何迁移服务。新诊断中的路径会隐藏
 OS 用户名。它会打印修复建议，但不会执行。
 
+**Provider API keys（提供商 API 密钥）** 部分检查使用密钥认证的提供商（省略 `authMode` 时默认为 key），其 `apiKey` 为环境变量引用（`${VAR}` 或 `$VAR`）。它会标记在**当前 doctor 进程**中未设置或为空的引用，且不会打印密钥值。OAuth、forward、local 以及已禁用的提供商会被跳过。配置不可读时显示 `--` 而非 `ok`。若代理以系统服务运行，请对照 **Running proxy process proxy env** —— 只有服务进程中的变量才会影响实际路由。
+
 ### `ocx debug [provider|usage …]`
 
 经正在运行的代理管理 API 读取或修改运行时 debug override。

@@ -492,6 +492,10 @@ The **OAuth reliability** section reports whether credential storage is writable
 single-flight / lock files can be created under `OPENCODEX_HOME`, non-healthy OAuth or Codex pool
 accounts (redacted ids) with a recovery `Action:`, and a static OK that the Codex forward path does
 not fabricate official-client metadata. Doctor never mutates credentials or applies repairs.
+The **Provider API keys** section checks key-authentication providers (default `authMode` is key when omitted) whose `apiKey` is an environment reference (`${VAR}` or `$VAR`). It flags references unset or empty in **this doctor process** without printing secrets. OAuth, forward, local, and disabled providers are skipped. Unreadable config shows `--` instead of `ok`. When the proxy runs as an installed service, compare with **Running proxy process proxy env** — only variables present in the service process matter for live routing.
+
+The **Provider API keys** section checks key-authentication providers (default uthMode is key when omitted) whose piKey is an environment reference (\ or $VAR). It flags references unset or empty in **this doctor process** without printing secrets. OAuth, forward, local, and disabled providers are skipped. Unreadable config shows -- instead of ok. When the proxy runs as an installed service, compare with **Running proxy process proxy env** — only variables present in the service process matter for live routing.
+
 
 ### `ocx debug [provider|usage …]`
 

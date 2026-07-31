@@ -408,6 +408,8 @@ ocx codex-shim uninstall
 セクションは Windows Orca runtime-home の不一致を限定的に検出し、必要なら元の Orca サービス削除と App
 home での再インストールを案内します。新しい診断のパスは OS ユーザー名をマスクします。復旧案内は出力しますが自ら適用はしません。
 
+**Provider API keys** セクションは、キー認証のプロバイダー（`authMode` 省略時は key が既定）のうち、`apiKey` が環境変数参照（`${VAR}` または `$VAR`）のものを検査します。**この doctor プロセス**で未設定または空の参照を報告し、値は表示しません。OAuth・forward・local および無効化されたプロバイダーは対象外です。設定が読めない場合は `ok` ではなく `--` を表示します。インストール済みサービスとして動作している場合は **Running proxy process proxy env** と照合してください。実際のルーティングに効くのはサービスプロセス側の変数だけです。
+
 ### `ocx debug [provider|usage …]`
 
 実行中のプロキシの管理 API からランタイムデバッグ override を読むか変えます。

@@ -322,7 +322,7 @@ export type ProviderApiKeyDiagnostic = {
 
 /** Warn when a key-auth provider's apiKey env reference resolves empty in this process. */
 export function collectProviderApiKeyDiagnostics(
-  providers: Record<string, { authMode?: string; apiKey?: string }> = readConfigDiagnostics().config.providers ?? {},
+  providers: Record<string, { authMode?: string; apiKey?: string; disabled?: boolean }> = readConfigDiagnostics().config.providers ?? {},
   env: EnvMap = process.env,
 ): ProviderApiKeyDiagnostic[] {
   const resolveInEnv = (value: string): string | undefined => {
@@ -332,9 +332,10 @@ export function collectProviderApiKeyDiagnostics(
   };
   const rows: ProviderApiKeyDiagnostic[] = [];
   for (const [provider, config] of Object.entries(providers)) {
-    if (config.authMode !== "key") continue;
-    const raw = typeof config.apiKey === "string" ? config.apiKey.trim() : "";
-    if (!raw) continue;
+    if (config.disabled === true) continue;
+    if ((config.authMode ?? "key") !== "key") continue;
+    const raw = typeof config.apiKey === "string" ? config.apiKey : "";
+    if (!raw.trim()) continue;
     const envName = envReferenceName(raw);
     if (!envName) continue;
     const resolved = resolveInEnv(raw);
@@ -717,7 +718,8 @@ export async function runDoctor(args: string[] = []): Promise<void> {
     console.log("      No Orca-owned CODEX_HOME mismatch detected.");
   }
 
-  const doctorConfig = readConfigDiagnostics().config;
+  const configDiagnostics = readConfigDiagnostics();
+  const doctorConfig = configDiagnostics.config;
   const startup = collectStartupHealth(doctorConfig);
   console.log("\nCodex restart safety");
   console.log(`  ${startup.rebootSafe ? "ok " : "!! "} ${startupHealthSummary(startup)}`);
@@ -776,9 +778,13 @@ export async function runDoctor(args: string[] = []): Promise<void> {
   console.log("\nConfigured proxy (value hidden)");
   console.log(`  ${configuredProxy.present ? "set    " : "unset  "} ${configuredProxy.key} (${configuredProxy.source}; ${configuredProxy.detail})`);
 
-  const providerApiKeys = collectProviderApiKeyDiagnostics(doctorConfig.providers);
+  const providerApiKeys = configDiagnostics.error
+    ? []
+    : collectProviderApiKeyDiagnostics(doctorConfig.providers);
   console.log("\nProvider API keys (value hidden)");
-  if (providerApiKeys.length === 0) {
+  if (configDiagnostics.error) {
+    console.log(`  --     config unreadable (${configDiagnostics.error}); provider key references not inspected`);
+  } else if (providerApiKeys.length === 0) {
     console.log("  ok     no empty env-referenced provider keys detected in this process");
   } else {
     for (const row of providerApiKeys) {
