@@ -1,0 +1,10 @@
+Add a small demo script to exercise the app-server detection and restart logic (uses mocked snapshots/io so it runs safely). Includes instructions to run locally with Bun. Please review process-matching and Windows PowerShell owner-scoped logic.
+
+How to run the demo locally:
+
+- From the repo root (requires Bun):
+  - bun run scripts/demo-restart.ts
+
+Notes:
+- The demo uses mocked snapshots and does not touch real system processes.
+- Review process matching regexes and Windows PowerShell enumeration for owner scoping.
