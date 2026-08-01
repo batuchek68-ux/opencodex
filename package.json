@@ -1,10 +1,11 @@
+git fetch origin
+git checkout BRANCH   # e.g. git checkout batuchek68-ux-patch-3     或 git checkout -b fix/package-json
+
+# 覆写 package.json 为合法内容（完整粘贴下面 JSON）
+cat > package.json <<'EOF'
 {
   "name": "@bitkyc08/opencodex",
-<<<<<<< HEAD
   "version": "2.8.0",
-=======
-  "version": "2.7.43-preview.20260728",
->>>>>>> origin/preview
   "description": "Universal provider proxy for OpenAI Codex & Claude Code — use any LLM with Codex CLI/App/SDK and Claude Code",
   "type": "module",
   "main": "./bin/package-main.mjs",
@@ -33,21 +34,32 @@
   "engines": {
     "node": ">=18"
   },
-  "trustedDependencies": [
+  "trustedImages 15–16 show the diff view for package.json and confirm the remaining problem andDependencies": [
     "bun"
   ],
   "scripts": {
-    "dev": "bun run src/cli/index.ts start",
+    "dev": "bun run src/cli/index what changed.
+
+What the screenshots.ts start",
     "dev:proxy": "bun run src/cli/index.ts start",
     "dev:gui": "cd gui && bun run dev",
-    "start": "bun run src/cli/index.ts start",
+    "start": "bun run src/cli/index.ts start show (short)
+- The diff includes plain shell instructions and a heredoc/EOF block inserted into package",
     "test": "bun scripts/test.ts",
     "typecheck": "bun x tsc --noEmit",
     "privacy:scan": "bun scripts/privacy-scan.ts",
-    "generate:jawcode-metadata": "bun scripts/generate-jawcode-metadata.ts",
-    "build:gui": "cd gui && bun install --frozen-lockfile && bun run build && cd .. && bun run prepare:package",
+    "generate:jawcode-m.json (green lines near the top and bottom). Those areetadata": "bun scripts/generate-jawcode-metadata.ts",
+    "build:gui": "cd gui && literal lines like:
+  - git fetch origin
+ bun install --frozen-lockfile && bun run build && cd .. && bun run prepare:package",
     "prepare:package": "bun scripts/prepare-package.ts",
-    "prepack": "bun run prepare:package",
+    "prepack": "bun run prepare  - git checkout -b fix/package-json
+  - cat > package.json <<'EOF'
+  - EOF
+  - node -e "JSON.parse(...)"  (verification command)
+  - git add/commit/push
+- You also changed the repository url field (that part is fine).
+- But the key issue:package",
     "prepublishOnly": "bun run typecheck && bun run build:gui",
     "release": "bun scripts/release.ts",
     "release:watch": "bun scripts/release.ts watch",
@@ -59,20 +71,28 @@
     "setup:hooks": "bun scripts/setup-hooks.ts"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.12.0",
+    "@bufbuild/protobuf": "^2.12: those shell lines and the heredoc markers are actually inside the package.json file content (not in the PR description or a README). That makes package.json invalid JSON and will always break npm/Bun/Node parsing (exactly the ERR_INVALID_PACKAGE_CONFIG you saw).
+
+Why this breaks CI
+- package.json must be pure, valid JSON. Any comments, shell commands, EOF markers, or merge info inside the file will cause JSON.parse to fail and cause installs / actions to exit early.
+- CI.0",
     "@modelcontextprotocol/sdk": "^1",
     "bun": "1.3.14",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/bun": "1.3.14",
+    "@types/bun workflows read/require package.json during install/typecheck steps; a malformed file makes many jobs fail immediately.
+
+Exactly what": "1.3.14",
     "typescript": "5.9.3"
   },
   "overrides": {
     "fast-uri": "^3.1.4"
   },
   "keywords": [
-    "codex",
+ to do now (pick one, fastest fixes)
+
+Option 1 — Quick fix    "codex",
     "openai",
     "proxy",
     "llm",
@@ -82,21 +102,34 @@
     "claude-code",
     "claude",
     "codex-cli",
-    "gemini",
+    in the GitHub web UI (recommended if you’re already in the browser)
+1 "gemini",
     "grok",
     "deepseek",
-    "chatgpt",
-    "llm-proxy",
-    "ai-gateway",
-    "openrouter"
-  ],
+   . Open the repository "chatgpt",
+    "llm file page: https-proxy",
+    "ai-g://github.com/bateway",
+    "atucheopenrouter"
+ k68-ux/opencodex/blob/main ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lidge-jun/opencodex.git"
+/package.json    "url": "git+https://github.com/batuchek68-ux/opencodex
+2. Click the pencil (Edit).
+3. Remove every line that is not JSON — delete the.git"
   },
   "homepage": "https://lidge-jun.github.io/opencodex/",
   "bugs": {
-    "url": "https://github.com/lidge-jun/opencodex/issues"
+    "url": "https://github green “git …”, “cat > package.json <<'EOF'”, “EOF”, verification commands, and any instructional.com/lidge-jun/opencodex/issues"
   },
   "license": "MIT"
 }
+EOF
+
+# 验证 JSON（必须通过）
+node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json valid')"
+
+git add package.json
+git commit -m comments.
+4. Replace the whole file content with a clean package.json (I provided one earlier). Make sure it starts with { and ends with } and contains no comments.
+5. In “Commit changes "fix(ci): restore valid package.json (remove embedded commands/markers)"
+git push -u origin BRANCH
