@@ -1,1 +1,105 @@
+# .github/workflows/ci.yml
+# CI 工作流：为 opencodex 提供一个可复现的 typecheck + 可选 GUI 构建流程
+# 说明（简要）：
+# - 当 push 到 main / master 或任何 feature/* 分支，或当为 main/master 提交 PR 时触发。
+# - typecheck job 使用 Node 18 + Bun，运行类型检查（bun x tsc --noEmit）并在可用时运行测试。
+# - build_gui job 是可选的、耗时较长的任务：在 typecheck 成功后并行构建 gui/dist，并把构建产物上传为 artifact。
+# - 若需要后续扩展（lint、test matrix、缓存策略、发布），可以在此基础上增加 steps 或 jobs。
+#
+# 运行注意：
+# - 该 workflow 期望仓库在根目录包含 package.json 和 gui/ 目录（若无 gui，可跳过 build_gui job）。
+# - 使用 oven-sh/bun-action 安装 Bun（action 会在 runner 上安装 Bun）。
+# - 若要在私有 runner 或其他环境使用，请确保 runner 有 Node 18 (或 actions/setup-node 将其安装)。
+# - 若仓库使用 fork 流程，请在 PR 创建后在上游仓库看 Checks 结果；如果 Actions 被上游配置为必须，确保在你的 fork 上启用 Actions 权限。
+#
+name: CI - bun / Typecheck / GUI build
 
+on:
+  push:
+    branches:
+      - main
+      - master
+      - 'feature/*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  # Typechecking + basic test job
+  typecheck:
+    name: Typecheck (Node 18 + Bun)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # fetch full history can be adjusted if needed
+          fetch-depth: 0
+
+      - name: Setup Node.js (v18)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup Bun runtime
+        uses: oven-sh/bun-action@v2
+        with:
+          bun-version: '1.x'
+
+      - name: Install dependencies (bun)
+        # prefer reproducible install, fall back if lockfile not present
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Typecheck (tsc)
+        run: bun x tsc --noEmit
+
+      - name: Run unit tests (if present)
+        # optional: run tests only when repository exposes a test script
+        run: |
+          if [ -f package.json ] && grep -q "\"test\":" package.json; then
+            bun run test || true
+          else
+            echo "No test script found in package.json; skipping tests."
+          fi
+
+  # GUI build job — depends on typecheck (so we don't waste time building GUI if types fail)
+  build_gui:
+    name: Build GUI (optional heavy job)
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v18)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/bun-action@v2
+        with:
+          bun-version: '1.x'
+
+      - name: Install root deps
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Install GUI deps and build
+        working-directory: gui
+        run: |
+          # If gui is absent or not using bun, adjust these commands
+          if [ -f package.json ]; then
+            bun install --frozen-lockfile || bun install
+            bun run build
+          else
+            echo "No gui/package.json found — skipping gui build"
+          fi
+
+      - name: Upload GUI build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gui-build
+          path: gui/dist
