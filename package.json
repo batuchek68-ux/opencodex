@@ -1,4 +1,9 @@
-{
+# 新分支修复（避免直接在 main 上改）
+git checkout -b fix/package-json
+
+# 将下面“干净的 package.json”写入文件（例如用编辑器或重定向）
+cat > package.json <<'EOF'
+{ 
   "name": "@bitkyc08/opencodex",
   "version": "2.8.0",
   "description": "Universal provider proxy for OpenAI Codex & Claude Code — use any LLM with Codex CLI/App/SDK and Claude Code",
@@ -88,7 +93,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lidge-jun/opencodex.git"
+    "url": "git+https://github.com/batuchek68-ux/opencodex.git"
   },
   "homepage": "https://lidge-jun.github.io/opencodex/",
   "bugs": {
@@ -96,3 +101,14 @@
   },
   "license": "MIT"
 }
+EOF
+
+# 验证 JSON 合法性
+node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('OK')"
+
+git add package.json
+git commit -m "fix(ci): remove merge conflict markers from package.json"
+git push -u origin fix/package-json
+
+# 在 GitHub 上创建 PR（或把分支改成你的 PR 分支）
+gh pr create --title "fix: package.json conflict markers removed" --body "Fix invalid package.json which caused CI failures" --base main --head fix/package-json
